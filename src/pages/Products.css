@@ -1,0 +1,227 @@
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-add {
+  background: var(--brown-dark);
+  color: var(--pink-soft);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-add:hover { background: var(--brown-mid); }
+
+.product-form {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--brown-mid);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--pink-soft);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--brown-dark);
+  background: var(--cream);
+  outline: none;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus { border-color: var(--brown-mid); }
+
+.btn-save {
+  background: var(--brown-dark);
+  color: var(--pink-soft);
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-save:hover { background: var(--brown-mid); }
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 16px;
+  flex: 1;
+}
+
+.product-info h3 {
+  font-size: 1rem;
+  color: var(--brown-dark);
+  margin-bottom: 4px;
+}
+
+.product-cat {
+  font-size: 0.78rem;
+  color: var(--brown-mid);
+  margin-bottom: 6px;
+}
+
+.product-desc {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--brown-dark);
+}
+
+.btn-delete {
+  background: #fff0f0;
+  color: #e74c3c;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover { background: #ffd5d5; }
+
+.empty {
+  text-align: center;
+  color: var(--brown-mid);
+  margin-top: 60px;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .products-grid { grid-template-columns: 1fr; }
+}
+.banner-preview {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.banner-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.toggle-group { display: flex; flex-direction: column; gap: 8px; }
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--pink-soft);
+  color: var(--brown-dark);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: fit-content;
+  transition: all 0.2s;
+}
+
+.toggle.on {
+  background: var(--brown-dark);
+  color: var(--pink-soft);
+}
+
+.preview-inputs { display: flex; flex-direction: column; gap: 10px; }
+
+.preview-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preview-input-row input { flex: 1; }
+
+.mini-preview {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--pink-soft);
+}
+
+.card-banner {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.card-body {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: flex-start;
+}
+
+.card-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
