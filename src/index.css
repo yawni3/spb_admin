@@ -1,0 +1,22 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --brown-dark: #3d1a0e;
+  --brown-mid: #7a3b1e;
+  --pink-soft: #f5c6d0;
+  --pink-light: #fff0f3;
+  --cream: #fff8f0;
+  --white: #ffffff;
+  --shadow: 0 2px 12px rgba(61, 26, 14, 0.1);
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--pink-light);
+  color: var(--brown-dark);
+  min-height: 100vh;
+}
