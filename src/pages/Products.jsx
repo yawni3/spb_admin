@@ -12,7 +12,8 @@ const emptyForm = {
   bannerUrl: "",
   thumbnailUrl: "",
   previewImages: ["", "", ""],
-  fileUrl: ""
+  fileUrl: "",
+  version: ""
 };
 
 const Products = () => {
@@ -112,15 +113,26 @@ const Products = () => {
               </div>
 
               <div className="form-group">
-                <label>Kategori</label>
-                <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-                  <option value="">Seç...</option>
-                  <option value="asset-pack">Asset Pack</option>
-                  <option value="illustration">İllüstrasyon</option>
-                  <option value="ui-kit">UI Kit</option>
-                  <option value="other">Diğer</option>
-                </select>
-              </div>
+              <label>Kategori</label>
+             <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
+             <option value="">Seç...</option>
+             <option value="asset-pack">Asset Pack</option>
+             <option value="wallpaper">İllüstrasyon</option>
+             <option value="app-game">App & Game</option>
+             <option value="other">Diğer</option>
+           </select>
+          </div>
+
+       {form.category === "app-game" && (
+            <div className="form-group">
+          <label>Sürüm</label>
+         <input
+         value={form.version}
+         onChange={e => setForm({...form, version: e.target.value})}
+         placeholder="v1.0.0"
+         />
+       </div>
+      )}
 
               {/* ÜCRETSİZ TOGGLE */}
               <div className="form-group toggle-group">
