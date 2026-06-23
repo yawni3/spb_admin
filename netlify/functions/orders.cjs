@@ -1,7 +1,7 @@
 const connectDB = require("./db.cjs");
 const Order = require("./models/Order.cjs");
 const Product = require("./models/Product.cjs");
-const verifyAdmin = require("./_verifyAdmin");
+const verifyAdmin = require("./_verifyAdmin.cjs");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",

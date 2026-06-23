@@ -1,7 +1,7 @@
 // create-admin.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const Admin = require('./netlify/functions/models/Admin.cjs');
+const Admin = require('./models/Admin.cjs');
 
 async function createAdmin() {
   await mongoose.connect('your_mongodb_uri');
