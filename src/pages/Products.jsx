@@ -5,15 +5,29 @@ import "./Products.css";
 
 const emptyForm = {
   name: "",
+  shortDescription: "",
   description: "",
+
   price: "",
   isFree: false,
+
   category: "",
+  tags: "",
+
   bannerUrl: "",
   thumbnailUrl: "",
   previewImages: ["", "", ""],
+
+  whatsIncluded: ["", "", ""],
+
   fileUrl: "",
-  version: ""
+  version: "",
+
+  license: {
+    personalUse: true,
+    commercialUse: true,
+    resaleAllowed: false
+  }
 };
 
 const Products = () => {
@@ -26,15 +40,16 @@ const Products = () => {
   const headers = { Authorization: `Bearer ${token}` };
 
   const fetchProducts = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+    console.log("API RESPONSE:", res.data);
+    setProducts(res.data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => { fetchProducts(); }, []);
 
@@ -42,10 +57,16 @@ const Products = () => {
     e.preventDefault();
     try {
       const payload = {
-        ...form,
-        price: form.isFree ? 0 : Number(form.price),
-        previewImages: form.previewImages.filter(url => url.trim() !== "")
-      };
+     ...form,
+     price: form.isFree ? 0 : Number(form.price),
+
+    tags: form.tags
+     .split(",")
+     .map(t => t.trim())
+     .filter(Boolean),
+
+    previewImages: form.previewImages.filter(Boolean)
+   };
       await axios.post(`${import.meta.env.VITE_API_URL}/products`, payload, { headers });
       setForm(emptyForm);
       setShowForm(false);
@@ -78,140 +99,142 @@ const Products = () => {
           </div>
         </div>
 
-        {showForm && (
-          <form className="product-form" onSubmit={handleSubmit}>
+       {showForm && (
+         <form className="product-form" onSubmit={handleSubmit}>
 
-            {/* BANNER ÖNİZLEME */}
-            {form.bannerUrl && (
-              <div className="banner-preview">
-                <img src={form.bannerUrl} alt="banner" />
-              </div>
-            )}
+        {/* 🥐 BASIC INFO */}
+        <div className="form-section">
+          <h3>🥐 Basic Info</h3>
 
-            <div className="form-grid">
-              {/* SOL — thumbnail */}
-              <div className="form-group">
-                <label>Thumbnail URL</label>
-                <input
-                  value={form.thumbnailUrl}
-                  onChange={e => setForm({...form, thumbnailUrl: e.target.value})}
-                  placeholder="https://imgur.com/..."
-                />
-                {form.thumbnailUrl && (
-                  <img src={form.thumbnailUrl} alt="thumb" className="thumb-preview" />
-                )}
-              </div>
+          <input
+            placeholder="Ürün adı"
+            value={form.name}
+            onChange={e => setForm({...form, name: e.target.value})}
+            required
+          />
 
-              {/* SAĞ — isim, kategori, fiyat */}
-              <div className="form-group">
-                <label>Ürün Adı *</label>
-                <input
-                  value={form.name}
-                  onChange={e => setForm({...form, name: e.target.value})}
-                  required
-                />
-              </div>
+          <input
+            placeholder="Kısa açıklama"
+            value={form.shortDescription}
+            onChange={e => setForm({...form, shortDescription: e.target.value})}
+          />
 
-              <div className="form-group">
-              <label>Kategori</label>
-             <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-             <option value="">Seç...</option>
-             <option value="asset-pack">Asset Pack</option>
-             <option value="wallpaper">İllüstrasyon</option>
-             <option value="app-game">App & Game</option>
-             <option value="other">Diğer</option>
-           </select>
+          <textarea
+            placeholder="Açıklama"
+            value={form.description}
+            onChange={e => setForm({...form, description: e.target.value})}
+            rows={4}
+          />
+        </div>
+
+        {/* 🍓 MARKET */}
+        <div className="form-section">
+          <h3>🍓 Market</h3>
+
+          <select
+            value={form.category}
+            onChange={e => setForm({...form, category: e.target.value})}
+          >
+            <option value="">Kategori</option>
+            <option value="asset-pack">Asset Pack</option>
+            <option value="wallpaper">İllüstrasyon</option>
+            <option value="app-game">App & Game</option>
+            <option value="other">Diğer</option>
+          </select>
+
+          <input
+            placeholder="Tags (pixel, cute, ui...)"
+            value={form.tags}
+            onChange={e => setForm({...form, tags: e.target.value})}
+          />
+
+          {form.category === "app-game" && (
+            <input
+              placeholder="Version (v1.0.0)"
+              value={form.version}
+              onChange={e => setForm({...form, version: e.target.value})}
+            />
+          )}
+
+          <div className="toggle-group">
+            <label>Ücretsiz mi?</label>
+            <div
+              className={`toggle ${form.isFree ? "on" : ""}`}
+              onClick={() => setForm({...form, isFree: !form.isFree})}
+            >
+              {form.isFree ? "Ücretsiz" : "Ücretli"}
+            </div>
           </div>
 
-       {form.category === "app-game" && (
-            <div className="form-group">
-          <label>Sürüm</label>
-         <input
-         value={form.version}
-         onChange={e => setForm({...form, version: e.target.value})}
-         placeholder="v1.0.0"
-         />
-       </div>
-      )}
+          {!form.isFree && (
+            <input
+              type="number"
+              placeholder="Fiyat"
+              value={form.price}
+              onChange={e => setForm({...form, price: e.target.value})}
+            />
+          )}
+        </div>
 
-              {/* ÜCRETSİZ TOGGLE */}
-              <div className="form-group toggle-group">
-                <label>Ücretsiz mi?</label>
-                <div
-                  className={`toggle ${form.isFree ? "on" : ""}`}
-                  onClick={() => setForm({...form, isFree: !form.isFree})}
-                >
-                  <span>{form.isFree ? "Ücretsiz" : "Ücretli"}</span>
-                </div>
-              </div>
+        {/* 🍰 MEDIA */}
+        <div className="form-section">
+          <h3>🍰 Media</h3>
 
-              {!form.isFree && (
-                <div className="form-group">
-                  <label>Fiyat (₺)</label>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={e => setForm({...form, price: e.target.value})}
-                    required={!form.isFree}
-                  />
-                </div>
-              )}
+          <input
+            placeholder="Banner URL"
+            value={form.bannerUrl}
+            onChange={e => setForm({...form, bannerUrl: e.target.value})}
+          />
 
-              {/* BANNER */}
-              <div className="form-group full">
-                <label>Banner URL (geniş görsel)</label>
-                <input
-                  value={form.bannerUrl}
-                  onChange={e => setForm({...form, bannerUrl: e.target.value})}
-                  placeholder="https://imgur.com/..."
-                />
-              </div>
+          <input
+            placeholder="Thumbnail URL"
+            value={form.thumbnailUrl}
+            onChange={e => setForm({...form, thumbnailUrl: e.target.value})}
+          />
 
-              {/* AÇIKLAMA */}
-              <div className="form-group full">
-                <label>Açıklama</label>
-                <textarea
-                  value={form.description}
-                  onChange={e => setForm({...form, description: e.target.value})}
-                  rows={4}
-                />
-              </div>
+          {form.previewImages.map((url, i) => (
+            <input
+              key={i}
+              placeholder={`Preview ${i + 1}`}
+              value={url}
+              onChange={e => {
+                const arr = [...form.previewImages];
+                arr[i] = e.target.value;
+                setForm({...form, previewImages: arr});
+              }}
+            />
+          ))}
+        </div>
 
-              {/* ÖNİZLEME GÖRSELLERİ */}
-              <div className="form-group full">
-                <label>Önizleme Görselleri (max 3)</label>
-                <div className="preview-inputs">
-                  {form.previewImages.map((url, i) => (
-                    <div key={i} className="preview-input-row">
-                      <input
-                        value={url}
-                        onChange={e => {
-                          const arr = [...form.previewImages];
-                          arr[i] = e.target.value;
-                          setForm({...form, previewImages: arr});
-                        }}
-                        placeholder={`Görsel ${i + 1} URL`}
-                      />
-                      {url && <img src={url} alt={`preview ${i}`} className="mini-preview" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* 🧁 COMMERCE */}
+        <div className="form-section">
+          <h3>🧁 Commerce</h3>
 
-              {/* DOSYA */}
-              <div className="form-group full">
-                <label>Dosya URL (Drive indirme linki)</label>
-                <input
-                  value={form.fileUrl}
-                  onChange={e => setForm({...form, fileUrl: e.target.value})}
-                  placeholder="https://drive.google.com/uc?export=download&id=..."
-                />
-              </div>
-            </div>
+          <input
+            placeholder="File URL"
+            value={form.fileUrl}
+            onChange={e => setForm({...form, fileUrl: e.target.value})}
+          />
 
-            <button type="submit" className="btn-save">Kaydet 🍰</button>
-          </form>
-        )}
+          {form.whatsIncluded.map((item, i) => (
+            <input
+              key={i}
+              placeholder={`What’s included ${i + 1}`}
+              value={item}
+              onChange={e => {
+                const arr = [...form.whatsIncluded];
+                arr[i] = e.target.value;
+                setForm({...form, whatsIncluded: arr});
+              }}
+            />
+          ))}
+        </div>
+
+        <button type="submit" className="btn-save">
+          Kaydet 🍰
+        </button>
+      </form>
+    )}
 
         {loading ? (
           <p className="loading">Yükleniyor... 🍰</p>
