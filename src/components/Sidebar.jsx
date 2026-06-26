@@ -24,6 +24,7 @@ const Sidebar = () => {
         <Link to="/products" className={location.pathname === "/products" ? "active" : ""}>
           🛍️ Ürünler
         </Link>
+        <Link to="/orders">📦 Siparişler</Link>
       </nav>
 
       <button className="sidebar-logout" onClick={logout}>

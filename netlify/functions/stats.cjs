@@ -1,11 +1,11 @@
 const connectDB = require("./db.cjs");
 const Product = require("./models/Product.cjs");
 const Order = require("./models/Order.cjs");
-const verifyAdmin = require("./_verifyAdmin.cjs"); 
+const verifyAdmin = require("./_verifyAdmin.cjs");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
 
@@ -17,14 +17,17 @@ exports.handler = async (event) => {
   try {
     await connectDB();
   } catch (err) {
+    console.error("❌ Stats - Bağlantı hatası:", err.message);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: "Veritabanı bağlantısı başarısız" })
+      body: JSON.stringify({ 
+        error: "Veritabanı bağlantısı başarısız",
+        details: err.message 
+      })
     };
   }
 
-  // Auth kontrolü ekle
   const auth = verifyAdmin(event);
   if (!auth.valid) {
     return {
@@ -48,7 +51,7 @@ exports.handler = async (event) => {
       })
     };
   } catch (err) {
-    console.error("Stats hatası:", err);
+    console.error("❌ Stats hatası:", err);
     return {
       statusCode: 500,
       headers,

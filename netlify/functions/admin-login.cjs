@@ -24,7 +24,8 @@ exports.handler = async (event) => {
 
   try {
     await connectDB();
-    console.log("MongoDB bağlantısı başarılı");
+    // ⭐ TÜM console.log'ları KALDIR!
+    // console.log("MongoDB bağlantısı başarılı"); // SİL
 
     const { email, password } = JSON.parse(event.body || "{}");
 
@@ -37,7 +38,7 @@ exports.handler = async (event) => {
     }
 
     const admin = await Admin.findOne({ email });
-    console.log("Admin bulundu:", admin ? "Evet" : "Hayır");
+    // console.log("Admin bulundu:", admin ? "Evet" : "Hayır"); // SİL
 
     if (!admin) {
       return {
@@ -48,7 +49,7 @@ exports.handler = async (event) => {
     }
 
     const isValid = await bcrypt.compare(password, admin.password);
-    console.log("Şifre doğrulandı:", isValid);
+    // console.log("Şifre doğrulandı:", isValid); // SİL
 
     if (!isValid) {
       return {
@@ -59,7 +60,7 @@ exports.handler = async (event) => {
     }
 
     if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET env değişkeni eksik!");
+      console.error("JWT_SECRET env değişkeni eksik!"); // ⭐ SADECE HATA LOG'U KALSIN
       return {
         statusCode: 500,
         headers,
@@ -90,7 +91,7 @@ exports.handler = async (event) => {
       })
     };
   } catch (err) {
-    console.error("Admin login hatası:", err);
+    console.error("Admin login hatası:", err); 
     return {
       statusCode: 500,
       headers,

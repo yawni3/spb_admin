@@ -1,39 +1,89 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  customerEmail: {
+  orderNumber: {
     type: String,
-    required: true
+    unique: true
   },
-
-  products: [
-    {
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product"
-      },
-
-      name: String,
-      price: Number,
-      fileUrl: String
+  customer: {
+    email: { 
+      type: String, 
+      required: true,
+      trim: true,
+      lowercase: true
     }
-  ],
-
-  totalPrice: {
+  },
+  items: [{
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    name: String,
+    price: Number,
+    quantity: Number,
+    thumbnailUrl: String,
+    fileUrl: String
+  }],
+  total: {
     type: Number,
+    required: true,
     default: 0
   },
-
-  downloadSent: {
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'cancelled'],
+    default: 'pending'
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['free'],
+    default: 'free'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid'],
+    default: 'pending'
+  },
+  termsAccepted: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  kvkkAccepted: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  mailSent: {
     type: Boolean,
     default: false
   },
-
+  mailSentAt: {
+    type: Date
+  },
+  mailError: {
+    type: String,
+    default: ''
+  },
+  downloadToken: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  downloadExpiresAt: {
+    type: Date
+  },
+  notes: {
+    type: String,
+    default: ''
+  },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }
 });
 
-module.exports =
-  mongoose.models.Order || mongoose.model("Order", orderSchema);
+
+
+module.exports = mongoose.models.Order || mongoose.model('Order', orderSchema);
