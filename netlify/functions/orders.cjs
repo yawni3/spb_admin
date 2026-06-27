@@ -1,9 +1,22 @@
 const connectDB = require("./db.cjs");
+
 const Order = require("./models/Order.cjs");
 const Product = require("./models/Product.cjs");
 const verifyAdmin = require("./_verifyAdmin.cjs");
 
-const emailjs = require('@emailjs/nodejs');
+
+let emailjs;
+try {
+  emailjs = require('@emailjs/nodejs');
+} catch (e) {
+  console.log('⚠️ @emailjs/nodejs yok, @emailjs/browser deneniyor...');
+  try {
+    emailjs = require('@emailjs/browser');
+  } catch (e2) {
+    console.error('❌ EmailJS yüklenemedi!');
+    emailjs = null;
+  }
+}
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -11,23 +24,66 @@ const headers = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
 
-// ⭐ Mail gönderme fonksiyonu
 const sendOrderEmail = async (order) => {
   try {
-    // Ürün listesini hazırla
-    const itemsList = order.items.map(item => 
-      `${item.name} x${item.quantity}`
-    ).join('\n');
+    const email = order.customer.email;
+    
+    if (!email) {
+      console.error('❌ Email adresi boş!');
+      return false;
+    }
+
+    // ⭐ ITEMS'İ HTML STRING OLARAK HAZIRLA
+    let itemsHtml = '';
+    if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+      order.items.forEach(item => {
+        itemsHtml += `
+          <div class="item">
+            <span class="item-icon">🧁</span>
+            <span class="item-name">${item.name || 'Ürün'}</span>
+            <span class="item-qty">x${item.quantity || 1}</span>
+          </div>
+        `;
+      });
+    } else {
+      itemsHtml = `
+        <div class="item">
+          <span class="item-icon">🧁</span>
+          <span class="item-name">Ürün</span>
+          <span class="item-qty">x1</span>
+        </div>
+      `;
+    }
+
+    // ⭐ DOWNLOAD LINK - Önce fileUrl'den al, yoksa downloadToken kullan
+    let downloadLink = '#';
+    
+    if (order.items && order.items.length > 0) {
+      const firstItem = order.items[0];
+      if (firstItem.fileUrl && firstItem.fileUrl !== '') {
+        downloadLink = firstItem.fileUrl;
+        console.log('📦 File URL kullanılacak:', downloadLink);
+      } else {
+        downloadLink = order.downloadToken 
+          ? `${process.env.VITE_SITE_URL || 'https://sleepypiebakery.art'}/download/${order.downloadToken}`
+          : '#';
+        console.log('📦 Download Token kullanılacak:', downloadLink);
+      }
+    }
+
+    console.log('📧 Download Link:', downloadLink);
 
     const templateParams = {
-      to_email: order.customer.email,
-      to_name: order.customer.email.split('@')[0],
-      order_number: order.orderNumber,
-      order_date: new Date(order.createdAt).toLocaleDateString('tr-TR'),
-      items: itemsList,
-      download_link: `${process.env.VITE_SITE_URL || 'https://sleepypiebakery.art'}/download/${order.downloadToken}`,
+      to_email: email,
+      to_name: email.split('@')[0] || 'Misafir',
+      order_number: order.orderNumber || 'SPB-XXXX',
+      order_date: new Date(order.createdAt || Date.now()).toLocaleDateString('tr-TR'),
+      items_html: itemsHtml,
+      download_link: downloadLink,  // ⭐ GÜNCELLENDİ
       site_url: process.env.VITE_SITE_URL || 'https://sleepypiebakery.art'
     };
+
+    console.log('📧 Template Params:', JSON.stringify(templateParams, null, 2));
 
     const response = await emailjs.send(
       process.env.EMAILJS_SERVICE_ID,
@@ -39,7 +95,7 @@ const sendOrderEmail = async (order) => {
       }
     );
 
-    console.log('✅ Email gönderildi:', response.status);
+    console.log('✅ Email gönderildi!');
     return true;
   } catch (error) {
     console.error('❌ Email hatası:', error);

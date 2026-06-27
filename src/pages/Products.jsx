@@ -37,6 +37,56 @@ const Products = () => {
 
   const showToast = useToast();
 
+  // ⭐ OneSignal Push Notification
+  const sendPushNotification = async (productName, productSlug) => {
+    try {
+      // Environment değişkenlerini kontrol et
+      const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+      const apiKey = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
+      
+      if (!appId || !apiKey) {
+        return;
+      }
+
+      const response = await fetch('https://api.onesignal.com/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${apiKey}`
+        },
+        body: JSON.stringify({
+          app_id: appId,
+          included_segments: ['All'],
+          headings: { 
+            tr: ' Yeni Ürün!',
+            en: ' New Product!'
+          },
+          contents: { 
+            tr: `${productName} şimdi Sleepy Pie Bakery'de! 🧁`,
+            en: `${productName} is now available at Sleepy Pie Bakery! 🧁`
+          },
+          url: `https://sleepypiebakery.art/product/${productSlug}`,
+          data: { productSlug: productSlug },
+          chrome_web_icon: 'https://sleepypiebakery.art/icon-192.png',
+          ios_attachments: { 
+            id: 'https://sleepypiebakery.art/icon-512.png' 
+          }
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.errors) {
+        console.warn('⚠️ Push notification uyarısı:', result.errors);
+        return;
+      }
+      return result;
+    } catch (err) {
+      console.error('❌ Push notification hatası:', err);
+      // Bildirim hatası ana akışı bozmasın
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
@@ -84,7 +134,6 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Slug
       const payload = {
         name: form.name,
         shortDescription: form.shortDescription,
@@ -101,7 +150,8 @@ const Products = () => {
         version: form.version,
         license: form.license
       };
-      
+
+      let productSlug = '';
 
       if (editingId) {
         await axios.put(
@@ -109,14 +159,21 @@ const Products = () => {
           { id: editingId, ...payload },
           { headers }
         );
-          showToast('✅ Ürün başarıyla güncellendi!', 'success');
+        showToast('✅ Ürün başarıyla güncellendi!', 'success');
       } else {
-        await axios.post(
+        const response = await axios.post(
           `${import.meta.env.VITE_API_URL}/products`,
           payload,
           { headers }
         );
+        productSlug = response.data.slug;
         showToast('🎉 Yeni ürün başarıyla eklendi!', 'success');
+        
+        // ⭐ YENİ ÜRÜN BİLDİRİMİ GÖNDER
+        if (productSlug) {
+          await sendPushNotification(payload.name, productSlug);
+          showToast('📱 Kullanıcılara bildirim gönderildi!', 'success');
+        }
       }
 
       setForm(emptyForm);
@@ -287,7 +344,7 @@ const Products = () => {
               ))}
             </div>
 
-            {/* ⭐ LICENSE (İsteğe bağlı) */}
+            {/* ⭐ LICENSE */}
             <div className="form-section">
               <h3>📜 Lisans</h3>
               <div className="license-group">
@@ -355,7 +412,6 @@ const Products = () => {
                     <p className="product-price">
                       {p.isFree ? "🆓 Ücretsiz" : `${p.price}₺`}
                     </p>
-                    {/* ⭐ Slug gösterimi (isteğe bağlı) */}
                     <p className="product-slug">🔗 /{p.slug}</p>
                   </div>
                 </div>
