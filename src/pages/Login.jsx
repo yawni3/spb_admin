@@ -16,13 +16,13 @@ const Login = () => {
     setError("");
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/admin-login`,
+        `${import.meta.env.VITE_API_URL}/admin/login`,
         { email, password }
       );
       localStorage.setItem("spb-admin-token", res.data.token);
       navigate("/");
     } catch (err) {
-      setError("Email veya şifre hatalı!");
+      setError(err.response?.data?.error || "Email veya şifre hatalı!");
     } finally {
       setLoading(false);
     }

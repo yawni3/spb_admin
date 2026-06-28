@@ -34,63 +34,13 @@ const Products = () => {
 
   const token = localStorage.getItem("spb-admin-token");
   const headers = { Authorization: `Bearer ${token}` };
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const showToast = useToast();
 
-  // ⭐ OneSignal Push Notification
-  const sendPushNotification = async (productName, productSlug) => {
-    try {
-      // Environment değişkenlerini kontrol et
-      const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
-      const apiKey = import.meta.env.VITE_ONESIGNAL_REST_API_KEY;
-      
-      if (!appId || !apiKey) {
-        return;
-      }
-
-      const response = await fetch('https://api.onesignal.com/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${apiKey}`
-        },
-        body: JSON.stringify({
-          app_id: appId,
-          included_segments: ['All'],
-          headings: { 
-            tr: ' Yeni Ürün!',
-            en: ' New Product!'
-          },
-          contents: { 
-            tr: `${productName} şimdi Sleepy Pie Bakery'de! 🧁`,
-            en: `${productName} is now available at Sleepy Pie Bakery! 🧁`
-          },
-          url: `https://sleepypiebakery.art/product/${productSlug}`,
-          data: { productSlug: productSlug },
-          chrome_web_icon: 'https://sleepypiebakery.art/icon-192.png',
-          ios_attachments: { 
-            id: 'https://sleepypiebakery.art/icon-512.png' 
-          }
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.errors) {
-        console.warn('⚠️ Push notification uyarısı:', result.errors);
-        return;
-      }
-      return result;
-    } catch (err) {
-      console.error('❌ Push notification hatası:', err);
-      // Bildirim hatası ana akışı bozmasın
-    }
-  };
-
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
-      console.log("API RESPONSE:", res.data);
+      const res = await axios.get(`${API_URL}/products`);
       setProducts(res.data);
     } catch (err) {
       console.error("Ürünler çekilemedi:", err);
@@ -151,29 +101,21 @@ const Products = () => {
         license: form.license
       };
 
-      let productSlug = '';
-
       if (editingId) {
         await axios.put(
-          `${import.meta.env.VITE_API_URL}/products`,
+          `${API_URL}/products`,
           { id: editingId, ...payload },
           { headers }
         );
         showToast('✅ Ürün başarıyla güncellendi!', 'success');
       } else {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/products`,
+          `${API_URL}/products`,
           payload,
           { headers }
         );
-        productSlug = response.data.slug;
+        const productSlug = response.data.slug;
         showToast('🎉 Yeni ürün başarıyla eklendi!', 'success');
-        
-        // ⭐ YENİ ÜRÜN BİLDİRİMİ GÖNDER
-        if (productSlug) {
-          await sendPushNotification(payload.name, productSlug);
-          showToast('📱 Kullanıcılara bildirim gönderildi!', 'success');
-        }
       }
 
       setForm(emptyForm);
@@ -189,20 +131,13 @@ const Products = () => {
     if (!confirm("Bu ürünü silmek istediğinden emin misin?")) return;
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/products?id=${id}`,
+        `${API_URL}/products?id=${id}`,
         { headers }
       );
       showToast('🗑️ Ürün başarıyla silindi!', 'success');
       fetchProducts();
     } catch (err) {
       showToast(`❌ ${err.response?.data?.error || 'Silme hatası!'}`, 'error');
-      if (err.response?.status === 400) {
-        alert("Ürün ID'si eksik!");
-      } else if (err.response?.status === 401) {
-        alert("Yetkisiz erişim! Tekrar giriş yapın.");
-      } else {
-        alert("Ürün silinirken bir hata oluştu!");
-      }
     }
   };
 
@@ -229,7 +164,6 @@ const Products = () => {
           <form className="product-form" onSubmit={handleSubmit}>
             <h2>{editingId ? "✏️ Ürün Düzenle" : "➕ Yeni Ürün"}</h2>
 
-            {/* 🥐 BASIC INFO */}
             <div className="form-section">
               <h3>🥐 Basic Info</h3>
               <input
@@ -251,7 +185,6 @@ const Products = () => {
               />
             </div>
 
-            {/* 🍓 MARKET */}
             <div className="form-section">
               <h3>🍓 Market</h3>
               <select
@@ -295,7 +228,6 @@ const Products = () => {
               )}
             </div>
 
-            {/* 🍰 MEDIA */}
             <div className="form-section">
               <h3>🍰 Media</h3>
               <input
@@ -322,7 +254,6 @@ const Products = () => {
               ))}
             </div>
 
-            {/* 🧁 COMMERCE */}
             <div className="form-section">
               <h3>🧁 Commerce</h3>
               <input
@@ -344,7 +275,6 @@ const Products = () => {
               ))}
             </div>
 
-            {/* ⭐ LICENSE */}
             <div className="form-section">
               <h3>📜 Lisans</h3>
               <div className="license-group">

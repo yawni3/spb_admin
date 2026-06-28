@@ -8,7 +8,6 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
 
   const token = localStorage.getItem("spb-admin-token");
@@ -22,10 +21,8 @@ const Orders = () => {
     setError(null);
     try {
       const res = await axios.get(`${API_URL}/orders`, { headers });
-      console.log("📦 Siparişler:", res.data);
       setOrders(res.data);
     } catch (err) {
-      console.error("❌ Siparişler yüklenemedi:", err);
       setError(err.response?.data?.error || "Siparişler yüklenirken hata oluştu");
     } finally {
       setLoading(false);
@@ -35,21 +32,6 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
-
-  const updateOrderStatus = async (id, status) => {
-    try {
-      await axios.put(
-        `${API_URL}/orders`,
-        { id, status },
-        { headers }
-      );
-      showToast("✅ Sipariş güncellendi:", status);
-      fetchOrders();
-    } catch (err) {
-      console.error("❌ Güncelleme hatası:", err);
-      alert("Sipariş güncellenirken hata oluştu!");
-    }
-  };
 
   const deleteOrder = async (id) => {
     if (!confirm("Bu siparişi silmek istediğinden emin misin?")) return;
@@ -86,7 +68,6 @@ const Orders = () => {
     ? orders 
     : orders.filter(o => o.status === statusFilter);
 
-  // ⭐ Toplam istatistikler
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(o => o.status === "pending").length;
   const completedOrders = orders.filter(o => o.status === "completed").length;
@@ -118,7 +99,6 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* İstatistikler */}
         <div className="stats-row">
           <div className="stat-box">
             <span className="stat-number">{totalOrders}</span>
@@ -134,7 +114,6 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* Filtre */}
         <div className="filter-row">
           <select 
             value={statusFilter} 
@@ -196,30 +175,6 @@ const Orders = () => {
 
                 <div className="order-footer">
                   <div className="order-actions">
-                    {order.status === "pending" && (
-                      <button 
-                        className="btn-processing"
-                        onClick={() => updateOrderStatus(order._id, "processing")}
-                      >
-                        🔄 İşleme Al
-                      </button>
-                    )}
-                    {order.status === "processing" && (
-                      <button 
-                        className="btn-complete"
-                        onClick={() => updateOrderStatus(order._id, "completed")}
-                      >
-                        ✅ Tamamla
-                      </button>
-                    )}
-                    {order.status === "pending" && (
-                      <button 
-                        className="btn-cancel"
-                        onClick={() => updateOrderStatus(order._id, "cancelled")}
-                      >
-                        ❌ İptal Et
-                      </button>
-                    )}
                     <button 
                       className="btn-delete-order"
                       onClick={() => deleteOrder(order._id)}
@@ -236,7 +191,6 @@ const Orders = () => {
                   </div>
                 </div>
 
-                {/* Detaylı Ürün Listesi */}
                 {order.items?.length > 0 && (
                   <div className="order-items-detail">
                     <div className="items-header">
