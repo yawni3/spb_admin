@@ -38,6 +38,12 @@ const Products = () => {
 
   const showToast = useToast();
 
+  // ⭐ Cache temizleme fonksiyonu
+  const clearProductCache = () => {
+    sessionStorage.removeItem('spb_products');
+    console.log('🗑️ Ürün cache\'i temizlendi');
+  };
+
   const fetchProducts = async () => {
     try {
       const res = await axios.get(`${API_URL}/products`);
@@ -108,6 +114,8 @@ const Products = () => {
           { headers }
         );
         showToast('✅ Ürün başarıyla güncellendi!', 'success');
+        // ⭐ Güncelleme sonrası cache temizle
+        clearProductCache();
       } else {
         const response = await axios.post(
           `${API_URL}/products`,
@@ -116,6 +124,8 @@ const Products = () => {
         );
         const productSlug = response.data.slug;
         showToast('🎉 Yeni ürün başarıyla eklendi!', 'success');
+        // ⭐ Yeni ürün sonrası cache temizle
+        clearProductCache();
       }
 
       setForm(emptyForm);
@@ -135,6 +145,8 @@ const Products = () => {
         { headers }
       );
       showToast('🗑️ Ürün başarıyla silindi!', 'success');
+      // ⭐ Silme sonrası cache temizle
+      clearProductCache();
       fetchProducts();
     } catch (err) {
       showToast(`❌ ${err.response?.data?.error || 'Silme hatası!'}`, 'error');
